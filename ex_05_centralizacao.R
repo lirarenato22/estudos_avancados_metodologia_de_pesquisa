@@ -1,27 +1,17 @@
-# EXERCÍCIO - BOOTSTRAPPING
+# EXERCÍCIO - Centralização
 
 # Aluno: Renato Lira
 
-# Exemplo de Distribuição Normal
+# QUESTÃO: Compartilhe com a gente um código criado por você 
+# com a centralização de alguma base de dados (nativa, externa ou 
+# criada por você ????) Lembre-se de compartilhar um link do github!
 
-dist_norm <- rnorm(100000000)
+# RESPOSTA:
 
-View(dist_norm)
+Aleatorio <- c(40, 40, 50, 60, 30, 50, 60, 324, 234, 234, 63, 324, 123)
 
+AleatorioCentral <- Aleatorio - mean(Aleatorio)
 
-# Exemplo de Utilização de Bootstrapping
+hist(Aleatorio)
 
-bootstrapping_media_10 <- replicate(10, mean(sample(dist_norm, 
-                                                32, replace = TRUE))) 
-
-mean(bootstrapping_media_10)
-
-
-bootstrapping_media_50 <- replicate(50, mean(sample(dist_norm,
-                                                45, replace = TRUE)))
-mean(bootstrapping_media_50)
-
-
-bootstrapping_media_100 <- replicate(100, mean(sample(dist_norm, 
-                                                58, replace = TRUE)))
-mean(bootstrapping_media_100)
+hist(AleatorioCentral)
