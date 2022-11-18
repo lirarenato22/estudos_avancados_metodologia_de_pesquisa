@@ -1,0 +1,66 @@
+---
+title: "Rmarkdown"
+author: "Renato Lira"
+date: '2022-11-18'
+output: html_document
+---
+
+# ESTUDOS AVANÇADOS DE METODOLOGIA DE PESQUISA
+
+## DISCENTE: RENATO LIRA
+
+### EXERCÍCIO 33: AGRUPAMENTO
+
+#### Questão: Para concluir esta atividade, crie um relatório com outra base de dados, como a UsArrest.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Carregando os pacotes:
+
+```{r}
+pacman::p_load(cluster, ggplot2, plotly)
+```
+
+Pré-processando:
+
+```{r}
+View(USArrests)
+```
+
+Semente aleatória: 
+
+```{r}
+set.seed(1)
+```
+
+### Decidiu-se agrupar com kmeans.
+
+Agrupando utilizando kmeans:
+
+```{r}
+XXX <- kmeans(x = USArrests, centers = 3) 
+
+USArrests$cluster <- as.factor(XXX$cluster)
+
+head(USArrests)
+```
+
+Plotando com o pacote:
+
+```{r}
+clusplot(USArrests, XXX$cluster, xlab = 'Um', 
+         ylab = 'Dois', main = 'Agrupando Clusters', 
+         lines = 0, shade = F, color = TRUE, labels = 2)
+```
+
+
+```{r USArrests, echo=FALSE, warning=FALSE, message=FALSE}
+graph_01 <- ggplot() +
+  geom_point(data = USArrests, mapping = aes(x = Assault, y = UrbanPop, colour = cluster)) + 
+  geom_point(mapping = aes_string(x = XXX$centers[ , "Assault"], y = XXX$centers[ , "UrbanPop"]), color = "red", size = 4) +
+  geom_text(mapping = aes_string(x = XXX$centers[ , "Assault"], y = XXX$centers[ , "UrbanPop"], label = 1:3), color = "white", size = 2) +
+  theme_light()
+ggplotly(graph_01)
+```
