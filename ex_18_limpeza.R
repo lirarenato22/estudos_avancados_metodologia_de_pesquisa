@@ -1,9 +1,9 @@
-# EXERCÕCIO - Limpeza 
+# EXERC√çCIO - Limpeza 
 
 # Aluno: Renato Lira
 
-# QUEST√O: Compartilhe com a gente uma ampliaÁ„o do cÛdigo desta aula, 
-# em que vocÍ remove os NA (not available) presentes nos dados.
+# QUEST√ÉO: Compartilhe com a gente uma amplia√ß√£o do c√≥digo desta aula, 
+# em que voc√™ remove os NA (not available) presentes nos dados.
 
 # RESPOSTA:
 
@@ -18,7 +18,7 @@ library(funModeling)
 
 general_data <- fread("https://covid.ourworldindata.org/data/owid-covid-data.csv") # carrega dados de covid19 no mundo
 
-latin_america_countries <-c("Argentina", "Brazil", "Bolivia", "Chile", "Colombia", "Costa Rica", "Cuba", "Dominican Republic", "Ecuador", "El Salvador", "Guatemala", "Haiti", "Honduras", "Mexico", "Nicaragua", "Panama", "Paraguay", "Peru", "Uruguay", "Venezuela") # vetor que identifica paÌses latino americanos
+latin_america_countries <-c("Argentina", "Brazil", "Bolivia", "Chile", "Colombia", "Costa Rica", "Cuba", "Dominican Republic", "Ecuador", "El Salvador", "Guatemala", "Haiti", "Honduras", "Mexico", "Nicaragua", "Panama", "Paraguay", "Peru", "Uruguay", "Venezuela") # vetor que identifica paÔøΩses latino americanos
 
 latin_america <- general_data %>% filter(location %in% latin_america_countries) # filtra casos apenas no vetor
 
@@ -28,19 +28,19 @@ latin_america <- latin_america %>% select(location, new_cases, new_deaths)
 
 status(latin_america) 
 
-# Observa a frequÍncia das vari·veis fator:
+# Observa a frequ√™ncia das vari√°veis fator:
 
 freq(latin_america) 
 
-# Observa a frequÍncia das vari·veis numÈricas:
+# Observa a frequ√™ncia das vari√°veis num√©ricas:
 
 plot_num(latin_america)
 
-# Apresenta as estatÌsticas das vari·veis numÈricas:
+# Apresenta as estat√≠sticas das vari√°veis num√©ricas:
 
-profiling_num(latin_america) # estatÌsticas das vari·veis numÈricas
+profiling_num(latin_america) # estat√≠sticas das vari√°veis num√©ricas
 
-# ModificaÁıes necess·rias para retirar os NA:
+# Modifica√ß√µes necess√°rias para retirar os NA:
 
 latin_america %>% filter(new_cases < 0)
 
@@ -49,3 +49,7 @@ latin_america <- latin_america %>% filter(new_cases>=0)
 # Retirando:
 
 sem_na <- na.omit(latin_america)
+
+latin_america_2 <- sem_na %>% filter(new_deaths!= 'is.na')
+
+status(latin_america_2)
