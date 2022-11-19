@@ -1,9 +1,9 @@
-# EXERCÕCIO - Mais Fatores!!
+# EXERC√çCIO - Mais Fatores!!
 
 # Aluno: Renato Lira
 
-# QUEST√O: Compartilhe com a gente um cÛdigo criado por vocÍ com um processo de
-# one hot encoding ou de discretizaÁ„o, e tambÈm a transformaÁ„o dos
+# QUEST√ÉO: Compartilhe com a gente um c√≥digo criado por voc√™ com um processo de
+# one hot encoding ou de discretiza√ß√£o, e tamb√©m a transforma√ß√£o dos
 # fatores de uma base de dados em 3 tipos: mais frequente, segundo mais frequente
 # e outros.
 # RESPOSTA:
@@ -14,12 +14,11 @@ library(ade4)
 library(arules)
 library(forcats)
 
-breast_cancer_csv <- read.table("breast_cancer.csv", 
-                       sep=";", header = T)
+breast_cancer_csv <- read.csv2('https://raw.githubusercontent.com/hugoavmedeiros/cp_com_r/master/bases_tratadas/breast_cancer.csv', stringsAsFactors = T)
 
 str(breast_cancer_csv)
 
-# convers„o em fatores:
+# convers√£o em fatores:
 
 for(i in 1:5) {
   breast_cancer_csv[,i] <- as.factor(breast_cancer_csv[,i]) } 
