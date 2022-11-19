@@ -1,12 +1,12 @@
-# EXERCÕCIO - ETL na Pr·tica
+# EXERC√çCIO - ETL na Pr√°tica
 
 # Aluno: Renato Lira
 
-# QUEST√O: Mostre que entendeu o processo de ETL modificando um pouco a 
-# extraÁ„o e o tratamento. Ou seja: adicione mais um ano de sinistros de 
-# tr‚nsito ‡ extraÁ„o e lembre-se de uni-lo aos demais com o rbind; depois, 
+# QUEST√ÉO: Mostre que entendeu o processo de ETL modificando um pouco a 
+# extra√ß√£o e o tratamento. Ou seja: adicione mais um ano de sinistros de 
+# tr√¢nsito √† extra√ß√£o e lembre-se de uni-lo aos demais com o rbind; depois, 
 # busque mais uma coluna para transformar em fator e acrescente isso 
-# ao cÛdigo. Lembre-se de compartilhar um link do github!
+# ao c√≥digo. Lembre-se de compartilhar um link do github!
 
 # RESPOSTA:
 
@@ -27,6 +27,8 @@ sinistrosRecife2021Raw <- read.csv2('http://dados.recife.pe.gov.br/dataset/44087
 # Adicionando um ano:
 
 sinistrosRecife2018Raw <- read.csv2('http://dados.recife.pe.gov.br/dataset/44087d2d-73b5-4ab3-9bd8-78da7436eed1/resource/2485590a-3b35-4ad0-b955-8dfc36b61021/download/acidentes_2018.csv')
+
+
 # Repetindo o comando do docente:
 
 colunas_iguais <- names(sinistrosRecife2020Raw[
@@ -40,11 +42,10 @@ sinistrosRecifeRaw <- rbind(sinistrosRecife2020Raw, sinistrosRecife2021Raw)
 
 # Trazendo mais um ano (2019):
 
-colnames(sinistrosRecife2019Raw)[which(names(sinistrosRecife2019Raw) == "data")] <- "dados"
+names(sinistrosRecife2019Raw)[names(sinistrosRecife2019Raw) == 'DATA'] <- 'data'
 
 sinistrao_recife <- bind_rows(sinistrosRecife2019Raw, sinistrosRecife2020Raw)
 
-sinistrao_recife$DATA <- as.Date(sinistrao_recife$DATA, format = "%Y-%m-%d")
+sinistrao_recife$data <- as.Date(sinistrao_recife$data, format = "%Y-%m-%d")
 
 sinistrao_recife$descricao <- as.factor(sinistrao_recife$descricao)
-
