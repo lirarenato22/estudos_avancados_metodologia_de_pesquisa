@@ -1,17 +1,19 @@
-# EXERCÕCIO - Leitura
+# EXERC√çCIO - Leitura
 
 # Aluno: Renato Lira
 
-# QUEST√O: Indique uma vantagem e uma desvantagem de cada tipo de
+# QUEST√ÉO: Indique uma vantagem e uma desvantagem de cada tipo de
 # arquivo (nativo e plano com interoperabilidade) e acrescente 
-# no cÛdigo uma forma adicional de exportaÁ„o e de leitura, com a
-# respectiva comparaÁ„o usando a funÁ„o microbenchmark.
+# no c√≥digo uma forma adicional de exporta√ß√£o e de leitura, com a
+# respectiva compara√ß√£o.
 
 # RESPOSTA:
 
 # Abrindo os pacotes:
 
 library(microbenchmark)
+library(rjson)
+library(xlsx)
 
 breast_cancer <- read.csv2('https://raw.githubusercontent.com/hugoavmedeiros/cp_com_r/master/bases_tratadas/breast_cancer.csv', stringsAsFactors = T)
 
@@ -21,34 +23,48 @@ breast_cancer <- read.csv2('https://raw.githubusercontent.com/hugoavmedeiros/cp_
 
 saveRDS(breast_cancer, "breast_cancer.rds")
 
-# exporta em formato tabular (.csv) - padr„o para interoperabilidade:
+# exporta em formato tabular (.csv) - padr√£o para interoperabilidade:
 
 write.csv2(breast_cancer, "breast_cancer.csv")
 
-# A primeira diferenÁa entre os dois È que os formatos nativos do R
-# ocupam muito menos espaÁo de armazenamento, o que torna o processo
-# mais ·gil.
+# exporta em formato .xlsx:
+
+write.xlsx(breast_cancer, "breast_cancer.xlsx", sheetName = "Sheet1", 
+           col.names = TRUE, row.names = TRUE, append = FALSE)
+
+# A primeira diferen√ßa entre os tr√™s √© que os formatos nativos do R
+# ocupam muito menos espa√ßo de armazenamento, o que torna o processo
+# mais √°gil. O que ocupa mais espa√ßo √© o formato xlsx.
+
 
 # carrega base de dados em formato nativo R:
 
 breast_cancer_rds <- readRDS('breast_cancer.rds')
 
-# carrega base de dados em formato tabular (.csv) - padr„o para interoperabilidade:
+
+# carrega base de dados em formato tabular (.csv) - padr√£o para interoperabilidade:
 
 breast_cancer_csv <- read.csv2('breast_cancer.csv', sep = ';')
 
-# compara os dois processos de exportaÁ„o, usando a funÁ„o microbenchmark
+# carrega base de dados em formato .xlsx:
+
+read_excel('breast_cancer.xlsx', sheet=1) 
+
+
+# compara os dois processos de exporta√ß√£o, usando a fun√ß√£o microbenchmark
 
 microbenchmark(a <- saveRDS(breast_cancer_rds, 
                             "breast_cancer.rds"), 
-               b <- write.csv2(breast_cancer_csv, "breast_cancer.csv"), 
+               b <- write.csv2(breast_cancer_csv, "breast_cancer.csv"),
+               c <- write.xlsx(breast_cancer, "breast_cancer.xlsx", sheetName = "Sheet1", 
+                               col.names = TRUE, row.names = TRUE, append = FALSE),
                times = 30L)
+
 
 microbenchmark(a <- readRDS('breast_cancer.rds'), 
                b <- read.csv2('breast_cancer.csv', 
-                              sep = ';'), times = 10L)
+                              sep = ';'), c <- read_excel('breast_cancer.xlsx', sheet=1), times = 10L)
 
-# Com esse teste, vemos que o formato nativo È mais eficiente, o que È importantÌssimo
-# tanto em execuÁ„o como em armazenamento quando as bases dispıem de uma quantidade
+# Com esse teste, vemos que o formato nativo √© mais eficiente, o que √© important√≠ssimo
+# tanto em execu√ß√£o como em armazenamento quando as bases  que disp√µem  de quantidade
 # enorme de dados.
-
