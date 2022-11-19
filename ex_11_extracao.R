@@ -1,12 +1,12 @@
-# EXERCÍCIO - Extração 
+# EXERCÃCIO - ExtraÃ§Ã£o
 
 # Aluno: Renato Lira
 
-# QUESTÃO: Mostre que você entendeu o conceito de área intermediária e
-# ambiente no R, modificando o código para manter sinistrosRecifeRaw
-# e a função naZero (ela pode ser útil no futuro!). Além disso, 
-# indique qual dos objetos na área intermediária mais estavam usando memória
-# do R. Lembre-se de compartilhar um link do github!
+# QUESTÃƒO: Mostre que vocÃª entendeu o conceito de Ã¡rea intermediÃ¡ria 
+# ambiente no R, modificando o cÃ³digo para manter sinistrosRecifeRaw 
+# e a funÃ§Ã£o naZero (ela pode ser Ãºtil no futuro!). AlÃ©m disso, indique 
+# qual dos objetos na Ã¡rea intermediÃ¡ria mais estavam usando memÃ³ria do R. 
+# Lembre-se de compartilhar um link do github!
 
 # RESPOSTA:
 
@@ -27,6 +27,8 @@ sinistrosRecife2021Raw <- read.csv2('http://dados.recife.pe.gov.br/dataset/44087
 # Adicionando um ano:
 
 sinistrosRecife2018Raw <- read.csv2('http://dados.recife.pe.gov.br/dataset/44087d2d-73b5-4ab3-9bd8-78da7436eed1/resource/2485590a-3b35-4ad0-b955-8dfc36b61021/download/acidentes_2018.csv')
+
+
 # Repetindo o comando do docente:
 
 colunas_iguais <- names(sinistrosRecife2020Raw[
@@ -40,16 +42,19 @@ sinistrosRecifeRaw <- rbind(sinistrosRecife2020Raw, sinistrosRecife2021Raw)
 
 # Trazendo mais um ano (2019):
 
-colnames(sinistrosRecife2019Raw)[which(names(sinistrosRecife2019Raw) == "data")] <- "dados"
+names(sinistrosRecife2019Raw)[names(sinistrosRecife2019Raw) == 'DATA'] <- 'data'
 
 sinistrao_recife <- bind_rows(sinistrosRecife2019Raw, sinistrosRecife2020Raw)
 
-sinistrao_recife$DATA <- as.Date(sinistrao_recife$DATA, format = "%Y-%m-%d")
+sinistrao_recife$data <- as.Date(sinistrao_recife$data, format = "%Y-%m-%d")
 
 sinistrao_recife$descricao <- as.factor(sinistrao_recife$descricao)
 
+# Listando os objetos:
 
-# Aplicando os princípios de Extração:
+ls()
+
+# Para saber quanto cada objeto ocupa:
 
 for (itm in ls()) { 
   print(formatC(c(itm, object.size(get(itm))), 
@@ -58,14 +63,28 @@ for (itm in ls()) {
         quote=F)
 }
 
-# sinistrao_recife era o que ocupava mais.
+# O objeto que mais tem ocupado Ã© o "sinistrao_recife_2".
 
-# Agora, observando todos:
+# Lista todos os objetos mais uma vez:
 
-ls()
+ls() 
+
+# Para usar o garbage collector:
 
 gc()
 
-# Agora, modificando e removendo:
+naZero <- function(x) {
+  x <- ifelse(is.na(x), 0, x)
+}
 
-rm(list = ls()[!ls() %in% c("sinistrao_recife", "naZero")])
+# Lista todos os objetos mais uma vez:
+
+ls() 
+
+# Deletando todos, menos os listados
+
+rm(list = c('sinistrosRecife2018Raw', 'sinistrosRecife2019Raw', 'sinistrosRecife2020Raw', 'sinistrosRecife2021Raw', 'colunas_iguais', 'sinistrosRecifeRaw'))
+
+saveRDS(sinistrao_recife, "bases_tratadas/sinistrosRecife.rds")
+
+write.csv2(sinistrao_recife, "bases_tratadas/sinistrosRecife.csv")
