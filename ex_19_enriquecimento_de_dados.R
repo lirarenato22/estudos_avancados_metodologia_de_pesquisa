@@ -1,8 +1,8 @@
-# EXERCÕCIO - Enriquecimento de Dados
+# EXERC√çCIO - Enriquecimento de Dados
 
 # Aluno: Renato Lira
 
-# QUEST√O: Compartilhe com a gente uma aplicaÁ„o de enriquecimento 
+# QUEST√ÉO: Compartilhe com a gente uma aplicac√£o de enriquecimento 
 # usando join em outra dupla de bases.
 
 
@@ -20,4 +20,5 @@ sinistrosRecife2020Raw <- read.csv2('http://dados.recife.pe.gov.br/dataset/44087
 
 # enriquecendo usando join:
 
-sinistrao_recife_2 <- left_join(sinistrosRecife2019Raw, sinistrosRecife2020Raw, by = c('bairro' = 'bairro'))
+sinistrao_recife_2 <- left_join(sinistrosRecife2020Raw, sinistrosRecife2019Raw, by = c('data' = 'DATA'))
+
