@@ -2,9 +2,10 @@
 
 # Aluno: Renato Lira
 
-# QUESTÃO:  Para concluir a atividade, aplique aprendizagem 
-# de máquina, comparando modelos, usando uma base diferente da do exemplo.
-
+# QUESTÃO:  Para concluir esta atividade,
+# aplique métricas de performance de regressão ou 
+# classificação em um modelo desenvolvido sobre uma base
+# diferente da mostrada no vídeo explicativo.
 # RESPOSTA:
 
 # carrega as bibliotecas
