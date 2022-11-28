@@ -1,0 +1,552 @@
+---
+title: "Atividade Final - Estudos Avançados de Metodologia de Pesquisa"
+author: "Ana Cristina, Christian Brandão, Renato Lira e Victor Santana"
+date: '2022-11-23'
+output: html_document
+---
+```{r}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+#### ATIVIDADE FINAL (ex_49): PROJETO DE DADOS
+
+#### Questões:
+
+#### 1) Elaboração do Canvas de Projetos de Dados
+
+#### 2) Implementação do Canvas de Projetos de Dados, com criação do código (script).
+
+#### 3) Disponibilização dos resultados em rmarkdown e do código no github.
+
+#### De acordo com a Questão 1), prosseguimos, agora, para a implementação do Canvas do Projeto de Dados, com a criação do código e disponibilização em Rmarkdown e na página aberta do github.
+
+#### O primeiro passo é carregar os pacotes necessários, que será feito em seguida.
+
+```{r setup, include=FALSE}
+
+pacman::p_load(dplyr, ggplot2, data.table, gridExtra, readr)
+
+```
+
+#### Utilizando esses pacotes, inicialmente carregaremos a Base de Dados Escolhida, que é a dos Pedidos de Acesso à Informação em Recife para o ano de 2020.
+
+```{r}
+acessoInformacao <- read_delim("D:/Downloads/pedidosinformacao20202.csv", 
+                                  delim = ";", escape_double = FALSE, trim_ws = TRUE) %>%
+  as.data.frame(acessoInformacao)
+```
+
+#### Depois de baixada a base, iremos realizar os primeiros comandos de visualização:
+
+```{r}
+is.data.frame(acessoInformacao)
+
+typeof(acessoInformacao)
+
+class(acessoInformacao) 
+
+str(acessoInformacao)
+
+length(acessoInformacao)
+
+acessoInformacao[1:30,'situacao_pedido']
+
+```
+
+#### Após isso, realizamos amostragens sem e com reposição usando função sample e tornamos uma variável dummy, acrescentando-a à base de dados:
+
+```{r}
+acessoInformacao$situacao_pedido_dummy <- ifelse(acessoInformacao$situacao_pedido == 'Respondido', 1, 0)
+```
+
+#### Agora, realizaremos a centralização com base na variável "situacao_pedido_dummy":
+
+```{r}
+Centralizando <- function(x) {
+  x <- x - mean(x)
+  return(x)
+}
+
+Centralizando(acessoInformacao$situacao_pedido_dummy)
+
+Centralizando <- function(x) {
+  x <- x - mean(x)
+}
+
+Centralizando(acessoInformacao$situacao_pedido_dummy)
+
+Teste_central <- Centralizando(acessoInformacao$situacao_pedido_dummy
+                             )
+
+
+```
+
+#### Selecionando as variáveis de interesse:
+
+```{r} 
+
+acessoInformacao <- acessoInformacao %>%
+  select(c(3,4,5,6,7,10:13,26:29,31,37), )
+
+```
+
+#### Descobrindo o número de dias entre a solicitação e a resposta:
+
+```{r} 
+acessoInformacao <- acessoInformacao %>%
+  mutate(dias = difftime(data_resposta, data_pedido, units = "days"))
+
+```
+
+#### Vendo se existe diferença entre o órgão solicitado e o órgão que respondeu:
+
+```{r} 
+acessoInformacao <- acessoInformacao %>%
+  mutate(comparison = if_else(
+    as.character(orgao_solicitacao) == as.character(orgao_resposta), "igual", "diferente"
+  ))
+
+
+```
+
+#### Regressão entre órgãos e resposta obtida:
+
+```{r} 
+regressaoDummy <- lm(situacao_pedido_dummy ~ orgao_resposta, acessoInformacao)
+```
+#### Apresentando o sumário da regressão:
+
+```{r} 
+summary(regressaoDummy)
+```
+
+#### Calculando qual foi a resposta mais frequente 
+
+```{r} 
+table(acessoInformacao$situacao_resposta)
+```
+#### Calculando quantas solicitações foram respondidas 
+
+```{r} 
+table(acessoInformacao$situacao_pedido)
+```
+
+#### Calculando o tempo médio de resposta da Secretaria de Saúde 
+
+```{r}
+secretariaSaude <- acessoInformacao[acessoInformacao$orgao_resposta == "SECRETARIA DE SAÚDE", ]
+
+secretariaSaude$dias = c(30, 18, 13, 32, 18, 5, 33, 12, 7, 0 , 31, 3, 2, 2, 2, 2, 2, 2, 2, 31, 1, 34, 31, 31, 30, 106, 1, 6, 32, 32, 0, 20, 29, 5, 33, 30, 0, 30, 32, 53, 30, 31, 30, 55, 38, 31, 31, 22, 21, 20, 28, 2, 20, 14, 22, 1, 32, 42, 44, 1, 5, 2, 29, 30, 14, 33, 28, 25, 33, 21, 30, 8, 31, 49, 19, 10, 87, 1, 30, 32, 5, 21, 51, 51, 1, 31, 31, 31, 1, 1, 30, 21, 43, 59, 28, 15, 14, 31, 7, 8, 30, 20, 34, 19, 13, 28, 169, 15, 110, 34, 35, 28, 30, 28, 23, 21, 38, 140, 34, 34, 33, 14, 14, 33, 14, 14, 33, 13, 13, 12, 35, 32, 32, 149, 8, 35, 145, 30, 76, 29, 7, 21, 17, 17, 36, 113, 120, 12, 9, 34, 34, 34, 33, 47, 33, 47, 45, 45, 45, 35, 34, 2, 33, 32, 2, 35, 32, 28, 27, 33, 30, 12, 21, 35, 14, 13, 12, 8, 9, 8, 83, 50, 50, 43, 4, 43, 56, 56, 38, 43, 41)
+
+mean(secretariaSaude$dias)
+
+```
+
+#### Calculando o tempo médio de resposta da Secretaria de Mobilidade e Controle Urbano:
+
+```{r}
+
+secretariaMobilidade <- acessoInformacao[acessoInformacao$orgao_resposta == "SECRETARIA DE MOBILIDADE E CONTROLE URBANO",]
+
+secretariaMobilidade$dias = c(13, 1, 1, 6, 3, 19, 21, 7, 1, 2, 25, 22, 13, 21, 19, 30, 3, 4, 22, 29, 2, 1, 31, 7, 17, 14, 17, 33, 5, 8, 1, 6, 1, 1, 26, 19, 13, 5)
+
+mean(secretariaMobilidade$dias)
+
+```
+
+#### Calculando o tempo médio de resposta da Secretaria de Finanças:
+
+```{r}
+
+secretariaFinanças <- acessoInformacao[acessoInformacao$orgao_resposta == "SECRETARIA DE FINANÇAS",]
+
+secretariaFinanças$dias = c(1, 21, 30, 44, 18, 27, 3, 33, 3, 156, 96, 2, 108, 0, 1, 28, 97, 12, 11, 31, 1, 1, 73, 13, 0, 0, 63, 22, 0, 30, 51, 2, 1, 1, 5, 11, 11, 4, 12, 1, 8, 14, 20, 1, 4, 3, 5, 1, 21, 0, 0, 0, 19, 0, 29, 4, 10, 30, 1, 0, 0, 17, 1, 21, 34, 3, 32, 10, 0, 38, 1, 33, 1, 1, 1, 29, 42)
+
+mean(secretariaFinanças$dias)
+
+```
+
+#### Calculando o tempo médio de resposta da Secretaria de Administração e Gestão de Pessoas:
+
+```{r}
+
+secretariaAdm <- acessoInformacao[acessoInformacao$orgao_resposta == "SECRETARIA DE ADMINISTRAÇÃO E GESTÃO DE PESSOAS",]
+
+secretariaAdm$dias = c(18, 23, 11, 5, 15, 14, 13, 1, 20, 1, 1, 1, 1, 13, 1, 1, 22, 2, 7, 20, 23, 24, 23, 0, 20, 25, 1, 9, 1, 0, 0, 5, 4, 4, 0, 0, 3, 1, 0, 20, 22, 6, 1, 6, 56, 18, 1, 14, 14, 20, 20, 6, 20, 2, 5, 39, 30, 7, 26, 1, 15, 21, 29, 29, 2, 33, 6, 13, 6, 18, 3)
+
+mean(secretariaAdm$dias)
+
+```
+
+#### Calculando o tempo médio de resposta da Secretaria de Educação:
+
+```{r}
+
+secretariaEdu <- acessoInformacao[acessoInformacao$orgao_resposta == "SECRETARIA DE EDUCAÇÃO",]
+
+secretariaEdu$dias = c(0, 0, 0, 0, 0, 35, 29, 47, 2, 22, 11, 3, 13, 7, 6, 2, 34, 4, 13, 31, 1, 31, 38, 38, 20, 28, 1, 30, 31, 8, 25, 25, 1, 7, 10, 1, 21, 26, 3, 19, 9, 9, 22, 5, 0, 12, 34, 35, 10, 10, 34, 8, 2, 2, 35, 27)
+
+mean(secretariaEdu$dias)
+
+```
+
+
+#### Calculando o tempo médio de resposta da Secretaria de Habilitação:
+
+```{r}
+
+secretariaHab <- acessoInformacao[acessoInformacao$orgao_resposta == "SECRETARIA DE HABITAÇÃO",]
+
+secretariaHab$dias = c(7, 0, 24, 0, 24, 21, 9, 20)
+
+mean(secretariaHab$dias)
+
+```
+#### Calculando o tempo médio de resposta da Secretaria de Saneamento:
+
+```{r}
+
+secretariaSan <- acessoInformacao[acessoInformacao$orgao_resposta == "SECRETARIA DE SANEAMENTO",]
+
+secretariaSan$dias = c(8, 3, 3, 5, 12)
+
+mean(secretariaSan$dias)
+
+
+```
+#### Calculando o tempo médio de resposta da Secretaria de Turismo e Lazer:
+
+```{r}
+
+secretariaTur <- acessoInformacao[acessoInformacao$orgao_resposta == "SECRETARIA DE TURISMO E LAZER",]
+
+secretariaTur$dias = c(7, 0, 0, 20, 5, 1, 1, 33, 33, 33, 33, 14, 7, 2, 22, 16, 16, 12, 39, 39)
+
+mean(secretariaTur$dias)
+
+```
+
+#### Calculando o tempo médio de resposta da Secretaria de Governo e Participação Social:
+
+```{r}
+
+secretariaGov <- acessoInformacao[acessoInformacao$orgao_resposta == "SECRETARIA DE GOVERNO E PARTICIPAÇÃO SOCIAL",]
+
+secretariaGov$dias = c(8, 32, 28, 3, 20, 9, 14, 9, 9, 16, 13, 0, 0, 13, 2, 7, 3, 43)
+
+mean(secretariaGov$dias)
+
+
+```
+
+#### Calculando o tempo médio de resposta da Secretaria de Meio Ambiente e Sustentabilidade:
+
+```{r}
+
+secretariaMA <- acessoInformacao[acessoInformacao$orgao_resposta == "SECRETARIA DE MEIO AMBIENTE E SUSTENTABILIDADE",]
+
+secretariaMA$dias = c(0, 56, 6, 20, 9, 20, 15, 8, 8, 6, 11)
+
+mean(secretariaMA$dias)
+
+
+```
+
+#### Calculando o tempo médio de resposta da Secretaria de Cultura:
+
+```{r}
+
+secretariaCul <- acessoInformacao[acessoInformacao$orgao_resposta == "SECRETARIA DE CULTURA",]
+
+secretariaCul$dias = c(30, 23, 32, 21, 33, 32, 31, 14)
+
+mean(secretariaCul$dias)
+
+
+```
+
+#### Calculando o tempo médio de resposta da Secretaria de Planejamento e Gestão:
+
+```{r}
+
+secretariaPlan <- acessoInformacao[acessoInformacao$orgao_resposta == "SECRETARIA DE PLANEJAMENTO E GESTÃO",]
+
+secretariaPlan$dias = c(17, 31, 44, 12, 14, 19, 19, 19, 19, 19)
+
+mean(secretariaPlan$dias)
+
+
+```
+
+#### Calculando o tempo médio de resposta da Secretaria de Desenvolvimento Social, Juventude, Política sobre Droga e Direitos Humanos:
+
+```{r}
+ 
+secretariaDS <- acessoInformacao[acessoInformacao$orgao_resposta == "SEC. DE DESENV. SOCIAL, JUVENTUDE, POLÍT. SOBRE DROGA E DIR. HUMANOS",]
+
+secretariaDS$dias = c(1, 21, 2, 30, 13, 1, 20, 26, 14, 7, 6, 1, 22, 22)
+
+mean(secretariaDS$dias)
+
+```
+
+#### Calculando o tempo médio de resposta da Secretaria de Infraestrutura:
+```{r}
+
+secretariaInfra <- acessoInformacao[acessoInformacao$orgao_resposta == "SECRETARIA DE INFRAESTRUTURA",]
+
+secretariaInfra$dias = c(21, 10, 1, 5, 8, 19)
+
+mean(secretariaInfra$dias)
+
+
+```
+
+#### Calculando o tempo médio de resposta da Secretaria de Desenvolvimento Econômico, Ciência, Tecnologia e Inovação:
+
+```{r}
+
+secretariaDesenv <- acessoInformacao[acessoInformacao$orgao_resposta == "SECRETARIA DE DESENV. ECONÔMICO, CIÊNCIA, TECNOLOGIA E INOVAÇÃO",]
+
+secretariaDesenv$dias = c(18, 20, 20, 14, 6, 6, 6, 15)
+
+mean(secretariaDesenv$dias)
+
+```
+#### Calculando o tempo médio de resposta da Secretaria de Planejamento Urbano:
+
+```{r}
+secretariaPlanUrba <- acessoInformacao[acessoInformacao$orgao_resposta == "SECRETARIA DE PLANEJAMENTO URBANO",]
+
+secretariaPlanUrba$dias = c(12, 21, 0, 7, 14, 14, 20, 23, 7)
+
+mean(secretariaPlanUrba$dias)
+
+
+```
+#### Calculando o tempo médio de resposta da Secretaria da Mulher:
+
+```{r}
+
+secretariaMul <- acessoInformacao[acessoInformacao$orgao_resposta == "SECRETARIA MULHER",]
+
+secretariaMul$dias = c(6, 20, 1)
+
+mean(secretariaMul$dias)
+
+```
+
+#### Calculando o tempo médio de resposta da Secretaria de Segurança Cidadã:
+
+```{r}
+
+
+secretariaSegC <- acessoInformacao[acessoInformacao$orgao_resposta == "SECRETARIA DE SEGURANÇA CIDADÃ",]
+
+secretariaSegC$dias = c(7, 8, 4, 6)
+
+mean(secretariaSegC$dias)
+
+
+```
+
+#### Calculando o tempo médio de resposta da Secretaria de Trabalho, Qualificação e Empreendedorismo:
+
+```{r}
+
+secretariaTrab <- acessoInformacao[acessoInformacao$orgao_resposta == "SECRETARIA DE TRABALHO, QUALIFICAÇÃO E EMPREENDEDORISMO",]
+
+secretariaTrab$dias = c(24, 26, 18, 4)
+
+mean(secretariaTrab$dias)
+
+
+```
+
+#### Regressão com validação cruzada
+
+####  Carrega as bibliotecas:
+```{r}
+pacman::p_load(ade4, car, caret, corrplot, data.table, dplyr, e1071, forcats, funModeling, ggplot2, mlbench, mltools, randomForest, rattle, tidyverse, lubridate)
+
+```
+
+####  Base de dados:
+
+```{r}
+acessoInformacaoReg <- read_delim("D:/Downloads/pedidosinformacao20202.csv", 
+                                  delim = ";", escape_double = FALSE, trim_ws = TRUE)
+
+```
+
+####  selecionando colunas relevantes
+
+```{r}
+acessoInformacaoReg <- acessoInformacaoReg %>%
+  select(c(3,4,5,6,7,10:12,26:29,31), )
+
+```
+####  transformando variável cidade:
+
+```{r}
+acessoInformacaoReg$cidade_solicitante <- ifelse(acessoInformacaoReg$cidade_solicitante == 'Recife', 'Recife', "Outra")
+
+```
+####  transformando variável órgãos:
+
+```{r}
+acessoInformacaoReg$orgao_solicitacao <- ifelse(acessoInformacaoReg$orgao_solicitacao == 'SECRETARIA DE SAÚDE', 'SECRETARIA DE SAÚDE', "OUTRA SECRETARIA")
+
+```
+
+####  calculando o número de dias:
+
+```{r}
+acessoInformacaoReg <- acessoInformacaoReg %>%
+  mutate(dias = difftime(data_resposta, data_pedido, units = "days"))
+
+acessoInformacaoReg$dias <- as.numeric(acessoInformacaoReg$dias)
+
+```
+
+####  Verificar se as colunas são diferentes:
+
+```{r}
+acessoInformacaoReg <- acessoInformacaoReg %>%
+  mutate(comparison = if_else(
+    as.character(orgao_solicitacao) == as.character(orgao_resposta), "igual", "diferente"
+  ))
+
+```
+
+####  Filtrando outliers:
+```{r}
+acessoInformacaoReg <- acessoInformacaoReg[c(1:803, 806:824), ]
+
+```
+
+####  Discretizando:
+```{r}
+table(acessoInformacaoReg$escolaridade_solicitante)
+acessoInformacao_1 <- acm.disjonctif(as.data.frame(acessoInformacaoReg$orgao_solicitacao))
+names(acessoInformacao_1) <- c('OUTRA.SECRETARIA', 'SECRETARIA.DE.SAUDE')
+
+acessoInformacao_2 <- acm.disjonctif(as.data.frame(acessoInformacaoReg$informacoes_pessoais))
+names(acessoInformacao_2) <- c('COM.INFO.PESSOAL', 'SEM.INFO.PESSOAL')
+
+acessoInformacao_3 <- acm.disjonctif(as.data.frame(acessoInformacaoReg$situacao_pedido))
+names(acessoInformacao_3) <- c('INDEFERIDO', 'RESPONDIDO')
+
+acessoInformacao_4 <- acm.disjonctif(as.data.frame(acessoInformacaoReg$motivo_pedido))
+names(acessoInformacao_4) <- c('ESTUDO', 'MOTIVO.NAO.INFORMADO', 'OUTROS.MOTIVOS', 'PESQUISA')
+
+acessoInformacao_5 <- acm.disjonctif(as.data.frame(acessoInformacaoReg$sexo_solicitante))
+names(acessoInformacao_5) <- c('FEMININO', 'MASCULINO')
+
+acessoInformacao_6 <- acm.disjonctif(as.data.frame(acessoInformacaoReg$escolaridade_solicitante))
+names(acessoInformacao_6) <- c('ENSINO.FUNDAMENTAL', 'ENSINO.MEDIO', 'ENSINO.SUPERIOR', 'MESTRADO.DOUTORADO', 'NAO.INFORMADO', 'OUTRA.ESCOLARIDADE', 'POS.GRADUACAO', 'SEM.INSTRUCAO.FORMAL')
+
+acessoInformacao_7 <- acm.disjonctif(as.data.frame(acessoInformacaoReg$cidade_solicitante))
+names(acessoInformacao_7) <- c('OUTRA', 'RECIFE')
+
+acessoInformacao_8 <- acm.disjonctif(as.data.frame(acessoInformacaoReg$profissao_solicitante))
+names(acessoInformacao_8) <- c('EMPREGADO.SETOR.PRIVADO', 'EMPRESARIO.EMPREENDEDOR', 'ESTUDANTE', 'JORNALISTA', 'MEMBRO.DE.ONG.INTERNACIONAL', 'MEMBRO.DE.ONG.NACIONAL', 'PROFISSAO.NAO.INFORMADA', 'OUTRA.PROFISSAO', 'PESQUISADOR', 'PROFESSOR', 'PROFISSIONAL.AUTONOMO', 'PROFISSIONAL.LIBERAL', 'SERVIDOR.PUBLICO.ESTADUAL', 'SERVIDOR.PUBLICO.FEDERAL', 'SERVIDOR.PUBLICO.MUNICIPAL')
+
+acessoInformacaoReg <- cbind(acessoInformacaoReg, acessoInformacao_1)
+acessoInformacaoReg <- cbind(acessoInformacaoReg, acessoInformacao_2)
+acessoInformacaoReg <- cbind(acessoInformacaoReg, acessoInformacao_3)
+acessoInformacaoReg <- cbind(acessoInformacaoReg, acessoInformacao_4)
+acessoInformacaoReg <- cbind(acessoInformacaoReg, acessoInformacao_5)
+acessoInformacaoReg <- cbind(acessoInformacaoReg, acessoInformacao_6)
+acessoInformacaoReg <- cbind(acessoInformacaoReg, acessoInformacao_7)
+acessoInformacaoReg <- cbind(acessoInformacaoReg, acessoInformacao_8)
+
+```
+
+####  set seed:
+
+```{r}
+set.seed(123)
+
+```
+#### Treino e Teste: Pré-processamento:
+
+```{r}
+particaoInfo = createDataPartition(acessoInformacaoReg$dias, p=.7, list = F) # cria a partição 70-30
+treinoInfo = acessoInformacaoReg[particaoInfo, ] # treino
+testeInfo = acessoInformacaoReg[-particaoInfo, ] # - treino = teste
+
+```
+
+#### Validação Cruzada: Pré-processamento:
+####  Controle de treinamento
+```{r}
+train.control <- trainControl(method = "cv", number = 10, verboseIter = T) # controle de treino
+```
+
+####  Regressão Linear:
+```{r}
+INFO_LM <- train(dias ~ ENSINO.FUNDAMENTAL + ENSINO.MEDIO + ENSINO.SUPERIOR +  MESTRADO.DOUTORADO + NAO.INFORMADO + OUTRA.ESCOLARIDADE + POS.GRADUACAO + SEM.INSTRUCAO.FORMAL + COM.INFO.PESSOAL + SEM.INFO.PESSOAL + ESTUDO + MOTIVO.NAO.INFORMADO + OUTROS.MOTIVOS + PESQUISA + EMPREGADO.SETOR.PRIVADO + EMPRESARIO.EMPREENDEDOR + ESTUDANTE + JORNALISTA + MEMBRO.DE.ONG.INTERNACIONAL + MEMBRO.DE.ONG.NACIONAL + PROFISSAO.NAO.INFORMADA + OUTRA.PROFISSAO + PESQUISADOR + PROFESSOR + PROFISSIONAL.AUTONOMO + PROFISSIONAL.LIBERAL + SERVIDOR.PUBLICO.ESTADUAL + SERVIDOR.PUBLICO.FEDERAL + SERVIDOR.PUBLICO.MUNICIPAL + OUTRA.SECRETARIA + SECRETARIA.DE.SAUDE + INDEFERIDO + RESPONDIDO + FEMININO + MASCULINO, data = treinoInfo, method = "lm", trControl = train.control)
+summary(INFO_LM) # sumário do modelo linear
+plot(varImp(INFO_LM))
+
+```
+
+####  Árvore de Decisão
+```{r}
+INFO_RPART <- train(dias ~ ENSINO.FUNDAMENTAL + ENSINO.MEDIO + ENSINO.SUPERIOR +  MESTRADO.DOUTORADO + NAO.INFORMADO + OUTRA.ESCOLARIDADE + POS.GRADUACAO + SEM.INSTRUCAO.FORMAL + COM.INFO.PESSOAL + SEM.INFO.PESSOAL + ESTUDO + MOTIVO.NAO.INFORMADO + OUTROS.MOTIVOS + PESQUISA + EMPREGADO.SETOR.PRIVADO + EMPRESARIO.EMPREENDEDOR + ESTUDANTE + JORNALISTA + MEMBRO.DE.ONG.INTERNACIONAL + MEMBRO.DE.ONG.NACIONAL + PROFISSAO.NAO.INFORMADA + OUTRA.PROFISSAO + PESQUISADOR + PROFESSOR + PROFISSIONAL.AUTONOMO + PROFISSIONAL.LIBERAL + SERVIDOR.PUBLICO.ESTADUAL + SERVIDOR.PUBLICO.FEDERAL + SERVIDOR.PUBLICO.MUNICIPAL + OUTRA.SECRETARIA + SECRETARIA.DE.SAUDE + INDEFERIDO + RESPONDIDO + FEMININO + MASCULINO, data = treinoInfo, method = "rpart", trControl = train.control)
+
+summary(INFO_RPART)
+fancyRpartPlot(INFO_RPART$finalModel) # desenho da árvore
+plot(varImp(INFO_RPART)) # importância das variáveis
+
+```
+
+####  Bagging com Floresta Aleatória:
+```{r}
+INFO_RF <- train(dias ~ ENSINO.FUNDAMENTAL + ENSINO.MEDIO + ENSINO.SUPERIOR +  MESTRADO.DOUTORADO + NAO.INFORMADO + OUTRA.ESCOLARIDADE + POS.GRADUACAO + SEM.INSTRUCAO.FORMAL + COM.INFO.PESSOAL + SEM.INFO.PESSOAL + ESTUDO + MOTIVO.NAO.INFORMADO + OUTROS.MOTIVOS + PESQUISA + EMPREGADO.SETOR.PRIVADO + EMPRESARIO.EMPREENDEDOR + ESTUDANTE + JORNALISTA + MEMBRO.DE.ONG.INTERNACIONAL + MEMBRO.DE.ONG.NACIONAL + PROFISSAO.NAO.INFORMADA + OUTRA.PROFISSAO + PESQUISADOR + PROFESSOR + PROFISSIONAL.AUTONOMO + PROFISSIONAL.LIBERAL + SERVIDOR.PUBLICO.ESTADUAL + SERVIDOR.PUBLICO.FEDERAL + SERVIDOR.PUBLICO.MUNICIPAL + OUTRA.SECRETARIA + SECRETARIA.DE.SAUDE + INDEFERIDO + RESPONDIDO + FEMININO + MASCULINO, data = treinoInfo, method = "cforest", trControl = train.control)
+
+plot(INFO_RF) # evolução do modelo
+plot(varImp(INFO_RF)) # plot de importância
+
+```
+
+####  Boosting com Boosted Generalized Linear Model
+```{r}
+INFO_ADA <- train(dias ~ ENSINO.FUNDAMENTAL + ENSINO.MEDIO + ENSINO.SUPERIOR +  MESTRADO.DOUTORADO + NAO.INFORMADO + OUTRA.ESCOLARIDADE + POS.GRADUACAO + SEM.INSTRUCAO.FORMAL + COM.INFO.PESSOAL + SEM.INFO.PESSOAL + ESTUDO + MOTIVO.NAO.INFORMADO + OUTROS.MOTIVOS + PESQUISA + EMPREGADO.SETOR.PRIVADO + EMPRESARIO.EMPREENDEDOR + ESTUDANTE + JORNALISTA + MEMBRO.DE.ONG.INTERNACIONAL + MEMBRO.DE.ONG.NACIONAL + PROFISSAO.NAO.INFORMADA + OUTRA.PROFISSAO + PESQUISADOR + PROFESSOR + PROFISSIONAL.AUTONOMO + PROFISSIONAL.LIBERAL + SERVIDOR.PUBLICO.ESTADUAL + SERVIDOR.PUBLICO.FEDERAL + SERVIDOR.PUBLICO.MUNICIPAL + OUTRA.SECRETARIA + SECRETARIA.DE.SAUDE + INDEFERIDO + RESPONDIDO + FEMININO + MASCULINO, data = treinoInfo, method = "glmboost", trControl = train.control)
+
+```
+
+#### Evolução do modelo:
+
+```{r}
+plot(INFO_ADA) 
+
+```
+#### Modelo:
+
+```{r}
+print(INFO_ADA) 
+
+```
+
+#### Sumário:
+
+```{r}
+summary(INFO_ADA) 
+```
+
+#### Melhor Modelo:
+
+```{r}
+melhor_modelo <- resamples(list(LM = INFO_LM, RPART = INFO_RPART, RF = INFO_RF, ADABOOST = INFO_ADA))
+melhor_modelo
+
+summary(melhor_modelo)
+
+predVals <- extractPrediction(list(INFO_RF), testX = testeInfo[, c(16:52)], testY = testeInfo$dias) 
+
+plotObsVsPred(predVals)
+```
+
+#### O código desta atividade utilizou pelo menos metade dos tópicos abarcados na disciplina em sua execução, dentre eles: 1) Tipos de Objetos; 2) Operadores Lógicos; 3) Amostragem; 4) Estruturas de Controle; e 5) Funções.
